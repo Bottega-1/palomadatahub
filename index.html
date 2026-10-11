@@ -1,46 +1,1319 @@
+```html
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>PalomaDataHub GH - Bottega & Data Hub</title>
+    <!-- Tailwind CSS CDN -->
+     <!-- Paystack Inline SDK -->
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            yellow: '#FFCC00',
+                            yellowHover: '#E6B800',
+                            darkBg: '#121212',
+                            cardBg: '#1E1E24',
+                            cardBorder: '#2A2A32',
+                            accent: '#26262a',
+                            textMuted: '#9CA3AF',
+                            mtn: '#FFCC00',
+                            telecel: '#E50914',
+                            at: '#0052CC'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
 
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
+    <style>
+        body {
+            background-color: #0b0b0e;
+            color: #ffffff;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
 
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-  <base href="/palomadatahub/">
+        .active-tab {
+            background-color: #FFCC00 !important;
+            color: #000000 !important;
+            font-weight: 800 !important;
+        }
 
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+        .network-card-selected {
+            border-color: #FFCC00 !important;
+            background-color: rgba(255, 204, 0, 0.1) !important;
+            box-shadow: 0 0 12px rgba(255, 204, 0, 0.15);
+        }
 
-  <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="paloma_data_hub">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+        .package-card-selected {
+            border-color: #FFCC00 !important;
+            background-color: rgba(255, 204, 0, 0.12) !important;
+        }
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+        .pulse-glow {
+            animation: pulseGlow 3s infinite;
+        }
 
-  <title>paloma_data_hub</title>
-  <link rel="manifest" href="manifest.json">
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 204, 0, 0.25); }
+            50% { box-shadow: 0 0 25px rgba(255, 204, 0, 0.55); }
+        }
+    </style>
 </head>
-<body>
-  <!--
-    You can customize the "flutter_bootstrap.js" script.
-    This is useful to provide a custom configuration to the Flutter loader
-    or to give the user feedback during the initialization process.
+<body class="flex justify-center bg-black min-h-screen">
 
-    For more details:
-    * https://docs.flutter.dev/platform-integration/web/initialization
-  -->
-  <script src="flutter_bootstrap.js" async></script>
+    <!-- App Main Mobile Container -->
+    <div id="app" class="w-full max-w-md bg-[#121212] min-h-screen flex flex-col justify-between relative shadow-2xl overflow-hidden border-x border-zinc-800/80 pb-20">
+
+        <!-- TOP HEADER BAR -->
+        <header class="sticky top-0 z-30 bg-[#121212]/95 backdrop-blur-md px-4 py-3 border-b border-zinc-800/80 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-brand-yellow text-black flex items-center justify-center font-black text-xl shadow-md">
+                    P
+                </div>
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="font-extrabold text-sm tracking-tight text-white">PalomaDataHub</span>
+                        <span class="bg-brand-yellow/20 text-brand-yellow text-[10px] font-black px-1.5 py-0.5 rounded border border-brand-yellow/30">GH</span>
+                    </div>
+                    <p class="text-[11px] text-zinc-400 font-medium">Welcome, <span id="headerUserName" class="text-white font-semibold">Guest User</span></p>
+                </div>
+            </div>
+
+            <!-- Wallet Widget -->
+            <div onclick="openModal('fundModal')" class="bg-[#1E1E24] hover:bg-zinc-800 border border-zinc-700/60 rounded-full px-3 py-1.5 flex items-center gap-2 cursor-pointer transition-all active:scale-95 shadow">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-[11px] font-semibold text-zinc-400">Bal:</span>
+                <span id="userBalanceText" class="text-xs font-black text-brand-yellow">GH₵ 148.50</span>
+                <i class="fa-solid fa-plus text-[9px] text-black bg-brand-yellow rounded-full p-1 font-bold"></i>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT CONTAINER -->
+        <main class="flex-1 overflow-y-auto px-4 pt-3 pb-6 no-scrollbar" id="mainContent">
+
+            <!-- ================= HOME PAGE ================= -->
+            <section id="page-home" class="space-y-4">
+
+                <!-- Promo Banner inspired by screenshot -->
+                <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-500 via-brand-yellow to-yellow-600 p-4 text-black shadow-lg pulse-glow">
+                    <div class="relative z-10">
+                        <div class="inline-flex items-center gap-1 bg-black text-brand-yellow text-[10px] font-black px-2.5 py-0.5 rounded-full mb-1.5 uppercase tracking-wider">
+                            <i class="fa-solid fa-bolt text-xs"></i> MEGA PROMO
+                        </div>
+                        <h2 class="text-lg font-black leading-tight">Get Instant Delivery on all Data Bundles</h2>
+                        <p class="text-xs font-semibold text-zinc-900 mt-1">Valid for all numbers today. Automated 24/7 dispatch guaranteed.</p>
+                    </div>
+                    <div class="absolute -right-4 -bottom-6 w-28 h-28 bg-black/10 rounded-full blur-xl pointer-events-none"></div>
+                    <div class="absolute right-3 top-3 text-black/20">
+                        <i class="fa-solid fa-wifi text-6xl"></i>
+                    </div>
+                </div>
+
+                <!-- Category Switcher: Airtime & Data vs Result Checkers -->
+                <div class="grid grid-cols-2 bg-[#1E1E24] p-1 rounded-xl border border-zinc-800">
+                    <button id="tab-airtime-data" onclick="switchHomeCategory('airtime-data')" class="py-2.5 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center gap-2 active-tab">
+                        <i class="fa-solid fa-sim-card"></i> Airtime & Data
+                    </button>
+                    <button id="tab-result-checkers" onclick="switchHomeCategory('result-checkers')" class="py-2.5 rounded-lg text-xs font-extrabold transition-all text-zinc-400 hover:text-white flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-graduation-cap"></i> Result Checkers
+                    </button>
+                </div>
+
+                <!-- CATEGORY 1: AIRTIME & DATA -->
+                <div id="section-airtime-data" class="space-y-4">
+                    
+                    <!-- Sub Toggle: Buy Data Bundle vs Buy Airtime -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <button id="btn-mode-data" onclick="setPurchaseMode('data')" class="p-3 rounded-xl border border-brand-yellow bg-brand-yellow/10 text-brand-yellow text-xs font-extrabold flex items-center justify-center gap-2 transition-all shadow-sm">
+                            <i class="fa-solid fa-wifi"></i> Buy Data Bundle
+                        </button>
+                        <button id="btn-mode-airtime" onclick="setPurchaseMode('airtime')" class="p-3 rounded-xl border border-zinc-800 bg-[#1E1E24] text-zinc-400 hover:text-white text-xs font-extrabold flex items-center justify-center gap-2 transition-all">
+                            <i class="fa-solid fa-phone"></i> Buy Airtime
+                        </button>
+                    </div>
+
+                    <!-- STEP 1: Select Mobile Network -->
+                    <div class="bg-[#1E1E24] border border-[#2A2A32] rounded-2xl p-4 space-y-3">
+                        <label class="text-xs font-bold text-zinc-300 flex items-center gap-2">
+                            <span class="w-5 h-5 rounded-full bg-brand-yellow text-black text-[10px] flex items-center justify-center font-black">1</span>
+                            Select Mobile Network
+                        </label>
+                        <div class="grid grid-cols-3 gap-2.5">
+                            <!-- MTN -->
+                            <div id="net-mtn" onclick="selectNetwork('mtn')" class="network-card-selected border border-zinc-700 bg-zinc-900/60 p-3 rounded-xl flex flex-col items-center justify-center gap-1 cursor-pointer transition-all">
+                                <div class="w-10 h-10 rounded-full bg-brand-yellow text-black font-black flex items-center justify-center text-xs shadow-md">
+                                    MTN
+                                </div>
+                                <span class="text-xs font-bold mt-1 text-white">MTN (1-300GB)</span>
+                            </div>
+                            <!-- Telecel -->
+                            <div id="net-telecel" onclick="selectNetwork('telecel')" class="border border-zinc-700 bg-zinc-900/60 p-3 rounded-xl flex flex-col items-center justify-center gap-1 cursor-pointer transition-all hover:border-brand-yellow">
+                                <div class="w-10 h-10 rounded-full bg-brand-telecel text-white font-black flex items-center justify-center text-[11px] shadow-md">
+                                    TEL
+                                </div>
+                                <span class="text-xs font-bold mt-1 text-white">Telecel (1-50GB)</span>
+                            </div>
+                            <!-- AT Ghana -->
+                            <div id="net-at" onclick="selectNetwork('at')" class="border border-zinc-700 bg-zinc-900/60 p-3 rounded-xl flex flex-col items-center justify-center gap-1 cursor-pointer transition-all hover:border-brand-yellow">
+                                <div class="w-10 h-10 rounded-full bg-brand-at text-white font-black flex items-center justify-center text-[11px] shadow-md">
+                                    AT
+                                </div>
+                                <span class="text-xs font-bold mt-1 text-white">AT (1-50GB)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: Beneficiary Phone Number -->
+                    <div class="bg-[#1E1E24] border border-[#2A2A32] rounded-2xl p-4 space-y-2">
+                        <label class="text-xs font-bold text-zinc-300 flex items-center gap-2">
+                            <span class="w-5 h-5 rounded-full bg-brand-yellow text-black text-[10px] flex items-center justify-center font-black">2</span>
+                            Enter Beneficiary Phone Number
+                        </label>
+                        <div class="relative flex items-center">
+                            <div class="absolute left-3 flex items-center gap-1 text-xs font-bold text-zinc-400 border-r border-zinc-700 pr-2">
+                                <span class="text-base">🇬🇭</span> +233
+                            </div>
+                            <input type="tel" id="beneficiaryPhone" placeholder="24 123 4567" maxlength="10" 
+                                   class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-3 pl-24 pr-10 text-sm font-semibold text-white placeholder-zinc-500 focus:outline-none focus:border-brand-yellow transition-all">
+                            <button onclick="fillMyNumber()" class="absolute right-3 text-zinc-400 hover:text-brand-yellow transition-colors" title="Use My Phone Number">
+                                <i class="fa-solid fa-address-book text-base"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: Select Package OR Airtime Amount -->
+                    <div class="bg-[#1E1E24] border border-[#2A2A32] rounded-2xl p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="text-xs font-bold text-zinc-300 flex items-center gap-2">
+                                <span class="w-5 h-5 rounded-full bg-brand-yellow text-black text-[10px] flex items-center justify-center font-black">3</span>
+                                <span id="step3Title">Select Data Bundle Package</span>
+                            </label>
+                            <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold px-2 py-0.5 rounded-full">Instant Dispatch</span>
+                        </div>
+
+                        <!-- Data Packages Grid Container -->
+                        <div id="dataPackagesContainer" class="grid grid-cols-2 gap-2.5 max-h-80 overflow-y-auto pr-1 no-scrollbar">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+
+                        <!-- Airtime Custom Input Container -->
+                        <div id="airtimePackagesContainer" class="hidden space-y-3">
+                            <div class="grid grid-cols-5 gap-1.5">
+                                <button onclick="selectQuickAirtime(5)" class="bg-zinc-900 border border-zinc-700 py-2 rounded-lg text-xs font-bold text-white hover:border-brand-yellow">GH₵ 5</button>
+                                <button onclick="selectQuickAirtime(10)" class="bg-zinc-900 border border-zinc-700 py-2 rounded-lg text-xs font-bold text-white hover:border-brand-yellow">GH₵ 10</button>
+                                <button onclick="selectQuickAirtime(20)" class="bg-zinc-900 border border-zinc-700 py-2 rounded-lg text-xs font-bold text-white hover:border-brand-yellow">GH₵ 20</button>
+                                <button onclick="selectQuickAirtime(50)" class="bg-zinc-900 border border-zinc-700 py-2 rounded-lg text-xs font-bold text-white hover:border-brand-yellow">GH₵ 50</button>
+                                <button onclick="selectQuickAirtime(100)" class="bg-zinc-900 border border-zinc-700 py-2 rounded-lg text-xs font-bold text-white hover:border-brand-yellow">GH₵ 100</button>
+                            </div>
+                            <div class="relative">
+                                <span class="absolute left-3 top-3 text-xs font-bold text-zinc-400">GH₵</span>
+                                <input type="number" id="customAirtimeAmount" placeholder="Or type custom airtime amount" min="1" max="1000" 
+                                       class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-2.5 pl-12 pr-4 text-sm font-bold text-white focus:outline-none focus:border-brand-yellow">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Checkout Button -->
+                    <button onclick="processPurchase()" class="w-full bg-brand-yellow hover:bg-brand-yellowHover text-black font-extrabold py-3.5 rounded-xl shadow-lg transition-all transform active:scale-98 flex items-center justify-center gap-2 text-sm">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span id="btnPurchaseText">Complete Data Purchase</span>
+                    </button>
+
+                </div>
+
+                <!-- CATEGORY 2: RESULT CHECKERS -->
+                <div id="section-result-checkers" class="hidden space-y-4">
+                    <div class="bg-[#1E1E24] border border-[#2A2A32] rounded-2xl p-4 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xs font-bold text-zinc-300 uppercase tracking-wider">Select WAEC Result Checker</h3>
+                            <span class="text-[10px] bg-brand-yellow/20 text-brand-yellow border border-brand-yellow/30 font-bold px-2 py-0.5 rounded">Verified WAEC Pins</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-3">
+                            <!-- BECE Checker Card -->
+                            <div id="checker-bece" onclick="selectChecker('bece')" class="package-card-selected border border-zinc-700 bg-zinc-900/60 p-4 rounded-xl flex items-center justify-between cursor-pointer transition-all">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-lg font-bold border border-purple-500/30">
+                                        <i class="fa-solid fa-school"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-white">BECE Result Checker</h4>
+                                        <p class="text-xs text-zinc-400">Instant Serial & PIN delivery</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-sm font-extrabold text-brand-yellow">GH₵ 22.00</span>
+                                </div>
+                            </div>
+
+                            <!-- WASSCE Checker Card -->
+                            <div id="checker-wassce" onclick="selectChecker('wassce')" class="border border-zinc-700 bg-zinc-900/60 p-4 rounded-xl flex items-center justify-between cursor-pointer transition-all hover:border-brand-yellow">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-lg font-bold border border-indigo-500/30">
+                                        <i class="fa-solid fa-user-graduate"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-white">WASSCE Result Checker</h4>
+                                        <p class="text-xs text-zinc-400">Instant Serial & PIN delivery</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-sm font-extrabold text-brand-yellow">GH₵ 25.00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recipient Phone Number for SMS -->
+                        <div class="pt-2">
+                            <label class="text-xs font-bold text-zinc-300 block mb-1.5">Recipient Mobile Number (SMS Copy)</label>
+                            <input type="tel" id="checkerPhone" placeholder="0241234567" maxlength="10" 
+                                   class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-2.5 px-3 text-sm font-semibold text-white focus:outline-none focus:border-brand-yellow">
+                        </div>
+
+                        <button onclick="processCheckerPurchase()" class="w-full bg-brand-yellow hover:bg-brand-yellowHover text-black font-extrabold py-3.5 rounded-xl shadow-lg transition-all transform active:scale-98 flex items-center justify-center gap-2 text-sm mt-2">
+                            <i class="fa-solid fa-key"></i>
+                            <span>Buy Result Checker PIN</span>
+                        </button>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- ================= HISTORY PAGE ================= -->
+            <section id="page-history" class="hidden space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-extrabold text-white">Transaction History</h2>
+                        <p class="text-xs text-zinc-400">Records of data, airtime & PIN purchases</p>
+                    </div>
+                    <button onclick="clearHistory()" class="text-xs text-red-400 hover:text-red-300 font-semibold flex items-center gap-1">
+                        <i class="fa-solid fa-trash-can text-xs"></i> Clear
+                    </button>
+                </div>
+
+                <!-- Filters -->
+                <div class="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+                    <button onclick="filterHistory('all')" id="hist-filter-all" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-brand-yellow text-black border border-brand-yellow">All</button>
+                    <button onclick="filterHistory('Data')" id="hist-filter-Data" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#1E1E24] text-zinc-400 border border-zinc-800 hover:text-white">Data</button>
+                    <button onclick="filterHistory('Airtime')" id="hist-filter-Airtime" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#1E1E24] text-zinc-400 border border-zinc-800 hover:text-white">Airtime</button>
+                    <button onclick="filterHistory('Checker')" id="hist-filter-Checker" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#1E1E24] text-zinc-400 border border-zinc-800 hover:text-white">Checkers</button>
+                </div>
+
+                <!-- History List Container -->
+                <div id="historyList" class="space-y-3">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </section>
+
+            <!-- ================= NOTIFICATIONS PAGE ================= -->
+            <section id="page-notification" class="hidden space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-extrabold text-white">Notifications</h2>
+                        <p class="text-xs text-zinc-400">Transaction & admin activity alerts</p>
+                    </div>
+                    <!-- View Mode Toggle -->
+                    <div class="bg-zinc-900 border border-zinc-800 rounded-lg p-1 flex items-center text-[11px] font-bold">
+                        <button id="notif-view-user" onclick="toggleNotifMode('user')" class="px-2.5 py-1 rounded text-black bg-brand-yellow transition-all">Customer</button>
+                        <button id="notif-view-agent" onclick="toggleNotifMode('agent')" class="px-2.5 py-1 rounded text-zinc-400 transition-all">Agent Feed</button>
+                    </div>
+                </div>
+
+                <div id="notificationList" class="space-y-3">
+                    <!-- Populated dynamically via JS -->
+                </div>
+            </section>
+
+            <!-- ================= SUPPORT PAGE ================= -->
+            <section id="page-support" class="hidden space-y-4">
+                <div>
+                    <h2 class="text-lg font-extrabold text-white">Customer Support & Help</h2>
+                    <p class="text-xs text-zinc-400">Reach out 24/7 or chat with our automated AI</p>
+                </div>
+
+                <!-- Contact Direct Buttons -->
+                <div class="grid grid-cols-2 gap-3">
+                    <a href="https://wa.me/233247375959?text=Hello%20PalomaDataHub%20Support,%20I%20need%20assistance." target="_blank" 
+                       class="bg-emerald-600/20 border border-emerald-500/40 p-4 rounded-2xl flex flex-col items-center justify-center text-center gap-2 hover:bg-emerald-600/30 transition-all group">
+                        <div class="w-12 h-12 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xl shadow-lg group-hover:scale-110 transition-transform">
+                            <i class="fa-brands fa-whatsapp"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">Chat on WhatsApp</h4>
+                            <p class="text-[10px] text-emerald-400">Direct Agent Response</p>
+                        </div>
+                    </a>
+
+                    <a href="mailto:support@palomadatahub.com" 
+                       class="bg-blue-600/20 border border-blue-500/40 p-4 rounded-2xl flex flex-col items-center justify-center text-center gap-2 hover:bg-blue-600/30 transition-all group">
+                        <div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center text-xl shadow-lg group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-envelope"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xs font-bold text-white">Email Support</h4>
+                            <p class="text-[10px] text-blue-400">support@palomadatahub.com</p>
+                        </div>
+                    </a>
+                </div>
+
+                <!-- AI Instant Chat Widget -->
+                <div class="bg-[#1E1E24] border border-[#2A2A32] rounded-2xl p-4 space-y-3">
+                    <div class="flex items-center justify-between border-b border-zinc-800 pb-2">
+                        <div class="flex items-center gap-2">
+                            <div class="relative">
+                                <div class="w-7 h-7 rounded-full bg-brand-yellow text-black flex items-center justify-center font-bold text-xs">P</div>
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-zinc-900 absolute -bottom-0.5 -right-0.5"></span>
+                            </div>
+                            <div>
+                                <h3 class="text-xs font-bold text-white">Paloma Support Bot</h3>
+                                <p class="text-[9px] text-zinc-400">Instant Automated Assistance</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Messages -->
+                    <div id="chatMessages" class="h-44 overflow-y-auto space-y-2 pr-1 text-xs no-scrollbar">
+                        <div class="bg-zinc-800/80 p-2.5 rounded-2xl rounded-tl-none max-w-[85%] text-zinc-200">
+                            Hello Dear! 👋 Welcome to PalomaDataHub GH. How can I assist you with data, airtime, or result checkers today?
+                        </div>
+                    </div>
+
+                    <!-- Chat Input -->
+                    <div class="flex items-center gap-2 pt-1">
+                        <input type="text" id="chatInput" placeholder="Ask a question..." 
+                               onkeypress="if(event.key==='Enter') sendChatMessage()"
+                               class="flex-1 bg-zinc-950 border border-zinc-700 rounded-xl py-2 px-3 text-xs text-white focus:outline-none focus:border-brand-yellow">
+                        <button onclick="sendChatMessage()" class="bg-brand-yellow text-black font-bold p-2.5 rounded-xl hover:bg-brand-yellowHover">
+                            <i class="fa-solid fa-paper-plane text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Rate Website Section -->
+                <div class="bg-[#1E1E24] border border-[#2A2A32] rounded-2xl p-4 text-center space-y-2">
+                    <h3 class="text-xs font-bold text-white uppercase tracking-wider">Rate Your Experience</h3>
+                    <p class="text-[11px] text-zinc-400">Help us improve PalomaDataHub GH</p>
+                    
+                    <div class="flex justify-center gap-2 py-2" id="starRatingContainer">
+                        <i class="fa-solid fa-star text-2xl text-zinc-600 cursor-pointer hover:text-brand-yellow transition-colors" onclick="rateWebsite(1)"></i>
+                        <i class="fa-solid fa-star text-2xl text-zinc-600 cursor-pointer hover:text-brand-yellow transition-colors" onclick="rateWebsite(2)"></i>
+                        <i class="fa-solid fa-star text-2xl text-zinc-600 cursor-pointer hover:text-brand-yellow transition-colors" onclick="rateWebsite(3)"></i>
+                        <i class="fa-solid fa-star text-2xl text-zinc-600 cursor-pointer hover:text-brand-yellow transition-colors" onclick="rateWebsite(4)"></i>
+                        <i class="fa-solid fa-star text-2xl text-zinc-600 cursor-pointer hover:text-brand-yellow transition-colors" onclick="rateWebsite(5)"></i>
+                    </div>
+
+                    <p id="ratingFeedback" class="text-xs font-semibold text-brand-yellow min-h-[18px]"></p>
+                </div>
+            </section>
+
+            <!-- ================= ACCOUNT PAGE ================= -->
+            <section id="page-account" class="hidden space-y-4">
+                <!-- User Profile Card -->
+                <div class="bg-gradient-to-br from-[#1E1E24] to-zinc-950 border border-[#2A2A32] rounded-2xl p-4 relative overflow-hidden">
+                    <div class="flex items-center gap-3">
+                        <div class="w-14 h-14 rounded-full bg-brand-yellow text-black font-black text-2xl flex items-center justify-center shadow-lg border-2 border-white/20">
+                            KM
+                        </div>
+                        <div>
+                            <h3 class="text-base font-extrabold text-white" id="accountName">Guest User</h3>
+                            <p class="text-xs text-zinc-400">No Phone Registered</p>
+                            <span class="inline-block mt-1 bg-brand-yellow/20 text-brand-yellow border border-brand-yellow/30 text-[10px] font-bold px-2 py-0.5 rounded-md">
+                                Verified Agent Tier
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-zinc-800 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] text-zinc-400 block font-medium uppercase">Wallet Balance</span>
+                            <span class="text-lg font-black text-brand-yellow" id="accountBalance">GH₵ 0.00</span>
+                        </div>
+                        <button onclick="openModal('fundModal')" class="bg-brand-yellow hover:bg-brand-yellowHover text-black text-xs font-extrabold px-3 py-2 rounded-xl flex items-center gap-1.5 shadow">
+                            <i class="fa-solid fa-wallet text-xs"></i> Add Money
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Account Settings Menu -->
+                <div class="bg-[#1E1E24] border border-[#2A2A32] rounded-2xl divide-y divide-zinc-800 text-xs font-medium">
+                    <div class="p-3.5 flex items-center justify-between hover:bg-zinc-800/50 cursor-pointer transition-colors" onclick="showToast('Transaction Security PIN is Active')">
+                        <div class="flex items-center gap-3 text-zinc-200">
+                            <i class="fa-solid fa-shield-halved text-brand-yellow w-4 text-center"></i>
+                            <span>Transaction Security PIN</span>
+                        </div>
+                        <span class="text-zinc-400 font-bold">Enabled <i class="fa-solid fa-chevron-right text-[10px] ml-1"></i></span>
+                    </div>
+
+                    <div class="p-3.5 flex items-center justify-between hover:bg-zinc-800/50 cursor-pointer transition-colors" onclick="copyReferralLink()">
+                        <div class="flex items-center gap-3 text-zinc-200">
+                            <i class="fa-solid fa-share-nodes text-brand-yellow w-4 text-center"></i>
+                            <span>Referral Program & Link</span>
+                        </div>
+                        <span class="text-brand-yellow font-bold">Copy Link <i class="fa-solid fa-copy text-[10px] ml-1"></i></span>
+                    </div>
+
+                    <div class="p-3.5 flex items-center justify-between hover:bg-zinc-800/50 cursor-pointer transition-colors" onclick="showToast('Agent Portal Mode Enabled')">
+                        <div class="flex items-center gap-3 text-zinc-200">
+                            <i class="fa-solid fa-user-shield text-brand-yellow w-4 text-center"></i>
+                            <span>Agent Switch Portal</span>
+                        </div>
+                        <span class="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded font-bold">Active</span>
+                    </div>
+
+                    <div class="p-3.5 flex items-center justify-between hover:bg-zinc-800/50 cursor-pointer transition-colors" onclick="showToast('Theme set to Dark Always')">
+                        <div class="flex items-center gap-3 text-zinc-200">
+                            <i class="fa-solid fa-moon text-brand-yellow w-4 text-center"></i>
+                            <span>Theme Interface</span>
+                        </div>
+                        <span class="text-zinc-400 font-bold">QuickPay Dark</span>
+                    </div>
+                </div>
+
+                <!-- Version & Logout -->
+                <div class="text-center pt-2 space-y-2">
+                    <p class="text-[11px] text-zinc-500">PalomaDataHub GH v3.1.0 • Bottega(PHILEMON)</p>
+                    <button onclick="logoutSimulation()" class="text-xs font-bold text-red-400 hover:text-red-300 py-1.5 px-4 rounded-xl border border-red-500/20 bg-red-500/10 inline-flex items-center gap-1.5">
+                        <i class="fa-solid fa-right-from-bracket"></i> Switch User Account
+                    </button>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- FLOATING QUICK SUPPORT BUTTON -->
+        <button onclick="switchPage('support')" class="fixed bottom-20 right-5 z-40 bg-brand-yellow text-black w-12 h-12 rounded-full flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition-all pulse-glow">
+            <i class="fa-solid fa-headset text-xl"></i>
+            <span id="floatingSupportBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-extrabold rounded-full h-4 w-4 flex items-center justify-center border-2 border-black">1</span>
+        </button>
+
+        <!-- BOTTOM NAVIGATION BAR -->
+        <nav class="absolute bottom-0 left-0 right-0 z-40 bg-[#16161a]/95 backdrop-blur-lg border-t border-zinc-800 px-2 py-2">
+            <div class="grid grid-cols-5 text-center">
+                
+                <!-- Home -->
+                <button onclick="switchPage('home')" id="nav-home" class="flex flex-col items-center justify-center py-1 text-brand-yellow transition-colors">
+                    <i class="fa-solid fa-house text-lg"></i>
+                    <span class="text-[10px] font-bold mt-1">Home</span>
+                </button>
+
+                <!-- History -->
+                <button onclick="switchPage('history')" id="nav-history" class="flex flex-col items-center justify-center py-1 text-zinc-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-receipt text-lg"></i>
+                    <span class="text-[10px] font-medium mt-1">History</span>
+                </button>
+
+                <!-- Support -->
+                <button onclick="switchPage('support')" id="nav-support" class="flex flex-col items-center justify-center py-1 text-zinc-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-headset text-lg"></i>
+                    <span class="text-[10px] font-medium mt-1">Support</span>
+                </button>
+
+                <!-- Notification -->
+                <button onclick="switchPage('notification')" id="nav-notification" class="flex flex-col items-center justify-center py-1 text-zinc-400 hover:text-white transition-colors relative">
+                    <div class="relative">
+                        <i class="fa-solid fa-bell text-lg"></i>
+                        <span id="notifBadge" class="absolute -top-1 -right-2 bg-red-500 text-white text-[9px] font-extrabold rounded-full h-4 w-4 flex items-center justify-center border-2 border-[#16161a]">
+                            2
+                        </span>
+                    </div>
+                    <span class="text-[10px] font-medium mt-1">Alerts</span>
+                </button>
+
+                <!-- Account -->
+                <button onclick="switchPage('account')" id="nav-account" class="flex flex-col items-center justify-center py-1 text-zinc-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-user text-lg"></i>
+                    <span class="text-[10px] font-medium mt-1">Account</span>
+                </button>
+
+            </div>
+        </nav>
+
+        <!-- MODAL: FUND WALLET -->
+        <div id="fundModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-xs p-5 space-y-4 shadow-2xl relative">
+                <button onclick="closeModal('fundModal')" class="absolute top-3 right-3 text-zinc-400 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+
+                <div class="text-center">
+                    <div class="w-10 h-10 rounded-full bg-brand-yellow/20 text-brand-yellow flex items-center justify-center text-lg font-bold mx-auto mb-2">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                    <h3 class="text-base font-extrabold text-white">Top-Up Wallet Balance</h3>
+                    <p class="text-xs text-zinc-400">Instant MoMo & Card Payment</p>
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs font-bold text-zinc-300 block mb-1">Enter Amount (GH₵)</label>
+                        <input type="number" id="fundAmount" placeholder="e.g. 50" min="5" value="50"
+                               class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-2.5 px-3 text-sm font-bold text-white focus:outline-none focus:border-brand-yellow">
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-zinc-300 block mb-1">Select Payment Provider</label>
+                        <select id="fundMethod" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl py-2.5 px-3 text-xs font-semibold text-white focus:outline-none focus:border-brand-yellow">
+                            <option value="MTN MoMo">MTN Mobile Money</option>
+                            <option value="Telecel Cash">Telecel Cash</option>
+                            <option value="AT Money">AT Money</option>
+                            <option value="Debit Card">Bank Card (Visa / Mastercard)</option>
+                        </select>
+                    </div>
+
+                    <button onclick="processDeposit()" class="w-full bg-brand-yellow hover:bg-brand-yellowHover text-black font-extrabold py-3 rounded-xl text-xs transition-all shadow">
+                        Pay & Credit Wallet Now
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL: RESULT CHECKER PIN DISPLAY -->
+        <div id="pinModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-xs p-5 space-y-4 shadow-2xl text-center relative">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl font-bold mx-auto border border-emerald-500/30">
+                   <i class="fa-solid fa-circle-check"></i>
+                </div>
+
+                <div>
+                    <h3 class="text-base font-extrabold text-white" id="pinModalTitle">Checker PIN Generated</h3>
+                    <p class="text-xs text-zinc-400">Transaction completed successfully!</p>
+                </div>
+
+                <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-800 text-left space-y-1.5">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-zinc-500 font-medium">Serial Number:</span>
+                        <span class="font-mono font-bold text-white" id="resSerial">WEC202688391</span>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span class="text-zinc-500 font-medium">PIN Code:</span>
+                        <span class="font-mono font-extrabold text-brand-yellow text-sm" id="resPin">849204928103</span>
+                    </div>
+                </div>
+
+                <button onclick="copyPinDetails()" class="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold py-2.5 rounded-xl text-xs border border-zinc-700 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-copy"></i> Copy PIN & Serial
+                </button>
+
+                <button onclick="closeModal('pinModal')" class="w-full bg-brand-yellow text-black font-extrabold py-2.5 rounded-xl text-xs">
+                    Close Window
+                </button>
+            </div>
+        </div>
+
+        <!-- TOAST NOTIFICATION POPUP -->
+        <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 bg-zinc-900 border border-brand-yellow/50 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 transition-all transform -translate-y-20 opacity-0 pointer-events-none">
+            <i class="fa-solid fa-circle-info text-brand-yellow"></i>
+            <span id="toastMessage">Notification message</span>
+        </div>
+
+    </div>
+
+    <script>
+        /* GLOBAL APPLICATION STATE */
+        const state = {
+            user: {
+                name: "Guest User",
+                phone: "",
+                balance: 0.00
+            },
+            purchaseMode: 'data', // 'data' or 'airtime'
+            selectedNetwork: 'mtn', // 'mtn', 'telecel', 'at'
+            selectedDataPackage: null,
+            selectedChecker: 'bece',
+            unreadNotifications: 2,
+            notifViewMode: 'user', // 'user' or 'agent'
+            
+            // EXACT DATA BUNDLE PACKAGES REQUIREMENT
+            packages: {
+                mtn: [
+                    { id: 'm1', size: '1.0 GB', validity: '90 Days', price: 6.00 },
+                    { id: 'm2', size: '2.0 GB', validity: '90 Days', price: 10.00 },
+                    { id: 'm3', size: '3.0 GB', validity: '90 Days', price: 16.00 },
+                    { id: 'm4', size: '5.0 GB', validity: '90 Days', price: 24.00 },
+                    { id: 'm5', size: '10.0 GB', validity: '90 Days', price: 44.50 },
+                    { id: 'm6', size: '20.0 GB', validity: '90 Days', price: 85.00 },
+                    { id: 'm7', size: '50.0 GB', validity: '90 Days', price: 200.00 },
+                    { id: 'm8', size: '100.0 GB', validity: '90 Days', price: 400.00 },
+                    { id: 'm9', size: '200.0 GB', validity: '90 Days', price: 800.00 },
+                    { id: 'm10', size: '300.0 GB', validity: '90 Days', price: 1200.00, bestValue: true }
+                ],
+                telecel: [
+                    { id: 't1', size: '1.0 GB', validity: '90 Days', price: 5.00 },
+                    { id: 't2', size: '2.0 GB', validity: '90 Days', price: 9.00 },
+                    { id: 't3', size: '5.0 GB', validity: '90 Days', price: 19.00 },
+                    { id: 't4', size: '10.0 GB', validity: '90 Days', price: 40.00 },
+                    { id: 't5', size: '15.0 GB', validity: '90 Days', price: 55.00 },
+                    { id: 't6', size: '20.0 GB', validity: '90 Days', price: 75.00 },
+                    { id: 't7', size: '50.0 GB', validity: '90 Days', price: 180.00, bestValue: true }
+                ],
+                at: [
+                    { id: 'a1', size: '1.0 GB', validity: '90 Days', price: 4.00 },
+                    { id: 'a2', size: '2.0 GB', validity: '90 Days', price: 8.00 },
+                    { id: 'a3', size: '5.0 GB', validity: '90 Days', price: 20.00 },
+                    { id: 'a4', size: '10.0 GB', validity: '90 Days', price: 39.00 },
+                    { id: 'a5', size: '20.0 GB', validity: '90 Days', price: 78.00 },
+                    { id: 'a6', size: '30.0 GB', validity: '90 Days', price: 115.00 },
+                    { id: 'a7', size: '50.0 GB', validity: '90 Days', price: 192.00, bestValue: true }
+                ]
+            },
+
+            history: [
+                {
+                    id: 'TRX98421',
+                    type: 'Data',
+                    network: 'MTN',
+                    details: '10.0 GB Data Bundle',
+                    phone: '0241234567',
+                    amount: 75.00,
+                    date: 'Today, 03:10 PM',
+                    status: 'Successful'
+                },
+                {
+                    id: 'TRX98402',
+                    type: 'Checker',
+                    network: 'WAEC',
+                    details: 'WASSCE Result Checker',
+                    phone: '0241234567',
+                    amount: 25.00,
+                    date: 'Yesterday, 11:15 AM',
+                    status: 'Successful'
+                }
+            ],
+
+            notifications: [
+                {
+                    id: 1,
+                    type: 'user',
+                    title: '10GB Data Delivered',
+                    message: 'Your order of 10.0 GB MTN Data for 0241234567 was completed successfully.',
+                    time: '20 mins ago'
+                },
+                {
+                    id: 2,
+                    type: 'agent',
+                    title: '[Agent Alert] Payment Received',
+                    message: 'Agent Alert: User 0241234567 paid GH₵ 75.00 for MTN 10GB Data.',
+                    time: '20 mins ago'
+                }
+            ]
+        };
+
+        window.onload = function() {
+            renderDataPackages();
+            renderHistory('all');
+            renderNotifications();
+            updateBalanceUI();
+        };
+
+        function switchPage(pageId) {
+            const pages = ['home', 'history', 'support', 'notification', 'account'];
+            pages.forEach(p => {
+                const el = document.getElementById(`page-${p}`);
+                const navBtn = document.getElementById(`nav-${p}`);
+                if (p === pageId) {
+                    el.classList.remove('hidden');
+                    navBtn.className = 'flex flex-col items-center justify-center py-1 text-brand-yellow transition-colors';
+                } else {
+                    el.classList.add('hidden');
+                    navBtn.className = 'flex flex-col items-center justify-center py-1 text-zinc-400 hover:text-white transition-colors';
+                }
+            });
+
+            if (pageId === 'notification') {
+                state.unreadNotifications = 0;
+                document.getElementById('notifBadge').classList.add('hidden');
+            }
+        }
+
+        function switchHomeCategory(category) {
+            const btnAirtimeData = document.getElementById('tab-airtime-data');
+            const btnCheckers = document.getElementById('tab-result-checkers');
+            const secAirtimeData = document.getElementById('section-airtime-data');
+            const secCheckers = document.getElementById('section-result-checkers');
+
+            if (category === 'airtime-data') {
+                btnAirtimeData.className = 'py-2.5 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center gap-2 active-tab';
+                btnCheckers.className = 'py-2.5 rounded-lg text-xs font-extrabold transition-all text-zinc-400 hover:text-white flex items-center justify-center gap-2';
+                secAirtimeData.classList.remove('hidden');
+                secCheckers.classList.add('hidden');
+            } else {
+                btnCheckers.className = 'py-2.5 rounded-lg text-xs font-extrabold transition-all flex items-center justify-center gap-2 active-tab';
+                btnAirtimeData.className = 'py-2.5 rounded-lg text-xs font-extrabold transition-all text-zinc-400 hover:text-white flex items-center justify-center gap-2';
+                secCheckers.classList.remove('hidden');
+                secAirtimeData.classList.add('hidden');
+            }
+        }
+
+        function setPurchaseMode(mode) {
+            state.purchaseMode = mode;
+            const btnData = document.getElementById('btn-mode-data');
+            const btnAirtime = document.getElementById('btn-mode-airtime');
+            const step3Title = document.getElementById('step3Title');
+            const dataContainer = document.getElementById('dataPackagesContainer');
+            const airtimeContainer = document.getElementById('airtimePackagesContainer');
+            const btnPurchaseText = document.getElementById('btnPurchaseText');
+
+            if (mode === 'data') {
+                btnData.className = 'p-3 rounded-xl border border-brand-yellow bg-brand-yellow/10 text-brand-yellow text-xs font-extrabold flex items-center justify-center gap-2 transition-all shadow-sm';
+                btnAirtime.className = 'p-3 rounded-xl border border-zinc-800 bg-[#1E1E24] text-zinc-400 hover:text-white text-xs font-extrabold flex items-center justify-center gap-2 transition-all';
+                step3Title.innerText = 'Select Data Bundle Package';
+                dataContainer.classList.remove('hidden');
+                airtimeContainer.classList.add('hidden');
+                btnPurchaseText.innerText = 'Complete Data Purchase';
+            } else {
+                btnAirtime.className = 'p-3 rounded-xl border border-brand-yellow bg-brand-yellow/10 text-brand-yellow text-xs font-extrabold flex items-center justify-center gap-2 transition-all shadow-sm';
+                btnData.className = 'p-3 rounded-xl border border-zinc-800 bg-[#1E1E24] text-zinc-400 hover:text-white text-xs font-extrabold flex items-center justify-center gap-2 transition-all';
+                step3Title.innerText = 'Select or Enter Airtime Amount';
+                dataContainer.classList.add('hidden');
+                airtimeContainer.classList.remove('hidden');
+                btnPurchaseText.innerText = 'Complete Airtime Purchase';
+            }
+        }
+
+        function selectNetwork(network) {
+            state.selectedNetwork = network;
+            ['mtn', 'telecel', 'at'].forEach(net => {
+                const el = document.getElementById(`net-${net}`);
+                if (net === network) {
+                    el.className = 'network-card-selected border border-zinc-700 bg-zinc-900/60 p-3 rounded-xl flex flex-col items-center justify-center gap-1 cursor-pointer transition-all';
+                } else {
+                    el.className = 'border border-zinc-700 bg-zinc-900/60 p-3 rounded-xl flex flex-col items-center justify-center gap-1 cursor-pointer transition-all hover:border-brand-yellow';
+                }
+            });
+            renderDataPackages();
+        }
+
+        function renderDataPackages() {
+            const container = document.getElementById('dataPackagesContainer');
+            const list = state.packages[state.selectedNetwork];
+            container.innerHTML = '';
+
+            if (list && list.length > 0) {
+                if (!state.selectedDataPackage || !list.find(p => p.id === state.selectedDataPackage.id)) {
+                    state.selectedDataPackage = list[0];
+                }
+
+                list.forEach(pkg => {
+                    const isSelected = state.selectedDataPackage.id === pkg.id;
+                    const card = document.createElement('div');
+                    card.onclick = () => {
+                        state.selectedDataPackage = pkg;
+                        renderDataPackages();
+
+                        const phoneInput = document.getElementById('beneficiaryPhone') || document.getElementById('phoneInput');
+                        const phone = phoneInput ? phoneInput.value.trim() : "";
+
+                        if (!phone) {
+                            alert("Please enter a beneficiary phone number first!");
+                            return;
+                        }
+
+                        const title = `${pkg.size} ${state.selectedNetwork.toUpperCase()} Data`;
+
+                        processPayment(title, pkg.price, phone, function() {
+                            if (typeof addHistory === 'function') {
+                                addHistory('Data Bundle', `${title} to ${phone}`, pkg.price);
+                            }
+                            alert(`Payment Successful!\n\n${pkg.size} data bundle successfully sent to ${phone}.`);
+                       });
+                    };
+                    card.className = `${isSelected ? 'package-card-selected' : 'border-zinc-700'} border bg-zinc-900/60 p-3 rounded-xl cursor-pointer transition-all hover:border-brand-yellow relative flex flex-col justify-between`;
+                    
+                    card.innerHTML = `
+                        ${pkg.bestValue ? '<span class="absolute -top-2 right-2 bg-brand-yellow text-black text-[9px] font-black px-1.5 py-0.5 rounded shadow">BEST VALUE</span>' : ''}
+                        <div>
+                            <span class="text-sm font-extrabold text-white block">${pkg.size}</span>
+                            <span class="text-[10px] text-zinc-400 font-medium">${pkg.validity}</span>
+                        </div>
+                        <div class="mt-2 pt-1.5 border-t border-zinc-700/60 flex items-center justify-between">
+                            <span class="text-xs font-black text-brand-yellow">GH₵ ${pkg.price.toFixed(2)}</span>
+                            <i class="fa-solid fa-circle-check text-xs ${isSelected ? 'text-brand-yellow' : 'text-zinc-600'}"></i>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+        }
+
+        function selectQuickAirtime(amount) {
+            document.getElementById('customAirtimeAmount').value = amount;
+        }
+
+        function fillMyNumber() {
+            document.getElementById('beneficiaryPhone').value = state.user.phone;
+            showToast("Filled beneficiary with my phone number");
+        }
+
+      function processPurchase() {
+    const phoneInput = document.getElementById('beneficiaryPhone').value.trim();
+    if (!phoneInput || phoneInput.length < 9) {
+        showToast("Please enter a valid Ghana phone number!");
+        return;
+    }
+
+    let amountToPay = 0;
+    let itemDescription = '';
+    let purchaseTypeName = 'Data';
+
+    // 1. Determine service type and cost
+    if (state.purchaseMode === 'data') {
+        if (!state.selectedDataPackage) {
+            showToast("Please select a data bundle package!");
+            return;
+        }
+        amountToPay = state.selectedDataPackage.price;
+        itemDescription = `${state.selectedDataPackage.size} ${state.selectedNetwork.toUpperCase()} Data`;
+        purchaseTypeName = 'Data Bundle';
+    } 
+    else if (state.purchaseMode === 'airtime') {
+        const airtimeVal = parseFloat(document.getElementById('customAirtimeAmount').value);
+        if (isNaN(airtimeVal) || airtimeVal <= 0) {
+            showToast("Please enter a valid airtime amount!");
+            return;
+        }
+        amountToPay = airtimeVal;
+        itemDescription = `GH₵ ${airtimeVal.toFixed(2)} Airtime (${state.selectedNetwork.toUpperCase()})`;
+        purchaseTypeName = 'Airtime';
+    }
+    else if (state.purchaseMode === 'checker' || state.purchaseMode === 'result') {
+        amountToPay = 18.00; // Standard price for result checker
+        const checkerName = state.selectedChecker ? state.selectedChecker.toUpperCase() : 'WAEC';
+        itemDescription = `${checkerName} Result Checker Voucher`;
+        purchaseTypeName = 'Result Checker';
+    }
+
+    // 2. Launch Paystack Checkout Popup
+    const customerEmail = (state.user && state.user.email) ? state.user.email : `user${phoneInput}@gmail.com`;
+
+    let handler = PaystackPop.setup({
+        key: 'pk_live_c519ca0e1c3d567323b016ddafd71fb7a8cf0503', // <-- PUT YOUR PAYSTACK TEST PUBLIC KEY HERE
+        email: customerEmail,
+        amount: Math.round(amountToPay * 100), // Paystack uses pesewas (multiply GHS by 100)
+        currency: 'GHS',
+        ref: 'PDH_' + Math.floor((Math.random() * 1000000000) + 1),
+        metadata: {
+            custom_fields: [
+                {
+                    display_name: "Beneficiary Phone",
+                    variable_name: "beneficiary_phone",
+                    value: phoneInput
+                },
+                {
+                    display_name: "Service Item",
+                    variable_name: "service_item",
+                    value: itemDescription
+                }
+            ]
+        },
+        callback: function(response) {
+            // 3. This runs automatically AFTER successful payment on Paystack
+            const netName = state.selectedNetwork ? state.selectedNetwork.toUpperCase() : 'GHANA';
+            const dateStr = 'Just Now';
+            const trxId = response.reference;
+
+            // Add to Transaction History
+            state.history.unshift({
+                id: trxId,
+                type: purchaseTypeName,
+                network: netName,
+                details: itemDescription,
+                phone: phoneInput,
+                amount: amountToPay,
+                date: dateStr,
+                status: 'Successful'
+            });
+
+            // Push Notifications
+            state.notifications.unshift({
+                id: Date.now(),
+                type: 'user',
+                title: `${purchaseTypeName} Received`,
+                message: `You successfully bought ${itemDescription} for ${phoneInput}.`,
+                time: 'Just Now'
+            });
+
+            state.notifications.unshift({
+                id: Date.now() + 1,
+                type: 'agent',
+                title: '[Agent Notice] New Order',
+                message: `Agent Alert: Paid GH₵ ${amountToPay.toFixed(2)} via Paystack for ${itemDescription}.`,
+                time: 'Just Now'
+            });
+
+            state.unreadNotifications += 2;
+            const badge = document.getElementById('notifBadge');
+            if (badge) {
+                badge.classList.remove('hidden');
+                badge.innerText = state.unreadNotifications;
+            }
+
+            if (typeof renderHistory === 'function') renderHistory('all');
+            if (typeof renderNotifications === 'function') renderNotifications();
+
+            showToast(`Payment Successful! ${itemDescription} sent.`);
+        },
+        onClose: function() {
+            showToast("Payment window closed.");
+        }
+    });
+
+    handler.openIframe();
+}
+
+        function selectChecker(type) {
+            state.selectedChecker = type;
+            const beceCard = document.getElementById('checker-bece');
+            const wassceCard = document.getElementById('checker-wassce');
+
+            if (type === 'bece') {
+                beceCard.className = 'package-card-selected border border-zinc-700 bg-zinc-900/60 p-4 rounded-xl flex items-center justify-between cursor-pointer transition-all';
+                wassceCard.className = 'border border-zinc-700 bg-zinc-900/60 p-4 rounded-xl flex items-center justify-between cursor-pointer transition-all hover:border-brand-yellow';
+            } else {
+                wassceCard.className = 'package-card-selected border border-zinc-700 bg-zinc-900/60 p-4 rounded-xl flex items-center justify-between cursor-pointer transition-all';
+                beceCard.className = 'border border-zinc-700 bg-zinc-900/60 p-4 rounded-xl flex items-center justify-between cursor-pointer transition-all hover:border-brand-yellow';
+            }
+        }
+
+        function processCheckerPurchase() {
+            const phone = document.getElementById('checkerPhone').value.trim() || state.user.phone;
+            const isBece = state.selectedChecker === 'bece';
+            const price = isBece ? 22.00 : 25.00;
+            const title = isBece ? 'BECE Result Checker' : 'WASSCE Result Checker';
+
+            if (state.user.balance < price) {
+                showToast("Insufficient Wallet Balance!");
+                openModal('fundModal');
+                return;
+            }
+
+            state.user.balance -= price;
+            updateBalanceUI();
+
+            const generatedSerial = (isBece ? 'BEC' : 'WEC') + '2026' + Math.floor(100000 + Math.random() * 900000);
+            const generatedPin = Math.floor(100000000000 + Math.random() * 900000000000).toString();
+
+            document.getElementById('pinModalTitle').innerText = title;
+            document.getElementById('resSerial').innerText = generatedSerial;
+            document.getElementById('resPin').innerText = generatedPin;
+
+            state.history.unshift({
+                id: 'TRX' + Math.floor(100000 + Math.random() * 900000),
+                type: 'Checker',
+                network: 'WAEC',
+                details: `${title} (Pin: ${generatedPin})`,
+                phone: phone,
+                amount: price,
+                date: 'Just Now',
+                status: 'Successful'
+            });
+
+            renderHistory('all');
+            openModal('pinModal');
+            showToast("Result Checker PIN Generated!");
+        }
+
+        function updateBalanceUI() {
+            const formatted = `GH₵ ${state.user.balance.toFixed(2)}`;
+            document.getElementById('userBalanceText').innerText = formatted;
+            document.getElementById('accountBalance').innerText = formatted;
+        }
+
+        function processDeposit() {
+            const amt = parseFloat(document.getElementById('fundAmount').value);
+            if (isNaN(amt) || amt < 5) {
+                showToast("Minimum deposit amount is GH₵ 5.00");
+                return;
+            }
+
+            state.user.balance += amt;
+            updateBalanceUI();
+            closeModal('fundModal');
+            showToast(`Deposit Successful! GH₵ ${amt.toFixed(2)} added to wallet.`);
+        }
+
+        function renderHistory(filterCategory) {
+            const listContainer = document.getElementById('historyList');
+            listContainer.innerHTML = '';
+
+            const filtered = state.history.filter(h => filterCategory === 'all' || h.type === filterCategory);
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = `
+                    <div class="text-center py-10 bg-[#1E1E24] rounded-2xl border border-zinc-800">
+                        <i class="fa-solid fa-receipt text-3xl text-zinc-600 mb-2"></i>
+                        <p class="text-xs font-semibold text-zinc-400">No transaction records found</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const el = document.createElement('div');
+                el.className = 'bg-[#1E1E24] border border-[#2A2A32] rounded-2xl p-3.5 flex items-center justify-between text-xs';
+                
+                let iconClass = 'fa-wifi text-amber-400 bg-amber-400/10 border-amber-400/20';
+                if (item.type === 'Airtime') iconClass = 'fa-phone text-blue-400 bg-blue-400/10 border-blue-400/20';
+                if (item.type === 'Checker') iconClass = 'fa-graduation-cap text-purple-400 bg-purple-400/10 border-purple-400/20';
+
+                el.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center border ${iconClass} text-sm">
+                            <i class="fa-solid ${iconClass.split(' ')[0]}"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-extrabold text-white">${item.details}</h4>
+                            <p class="text-[10px] text-zinc-400">${item.phone} • ${item.date}</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="font-black text-brand-yellow block">-GH₵ ${item.amount.toFixed(2)}</span>
+                        <span class="text-[9px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-bold">${item.status}</span>
+                    </div>
+                `;
+                listContainer.appendChild(el);
+            });
+        }
+
+        function filterHistory(type) {
+            ['all', 'Data', 'Airtime', 'Checker'].forEach(t => {
+                const btn = document.getElementById(`hist-filter-${t}`);
+                if (t === type) {
+                    btn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold bg-brand-yellow text-black border border-brand-yellow';
+                } else {
+                    btn.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#1E1E24] text-zinc-400 border border-zinc-800 hover:text-white';
+                }
+            });
+            renderHistory(type);
+        }
+
+        function clearHistory() {
+            state.history = [];
+            renderHistory('all');
+            showToast("History cleared");
+        }
+
+        function toggleNotifMode(mode) {
+            state.notifViewMode = mode;
+            const btnUser = document.getElementById('notif-view-user');
+            const btnAgent = document.getElementById('notif-view-agent');
+
+            if (mode === 'user') {
+                btnUser.className = 'px-2.5 py-1 rounded text-black bg-brand-yellow transition-all';
+                btnAgent.className = 'px-2.5 py-1 rounded text-zinc-400 transition-all';
+            } else {
+                btnAgent.className = 'px-2.5 py-1 rounded text-black bg-brand-yellow transition-all';
+                btnUser.className = 'px-2.5 py-1 rounded text-zinc-400 transition-all';
+            }
+            renderNotifications();
+        }
+
+        function renderNotifications() {
+            const list = document.getElementById('notificationList');
+            list.innerHTML = '';
+
+            const filtered = state.notifications.filter(n => n.type === state.notifViewMode);
+
+            if (filtered.length === 0) {
+                list.innerHTML = `
+                    <div class="text-center py-10 bg-[#1E1E24] rounded-2xl border border-zinc-800">
+                        <i class="fa-solid fa-bell-slash text-3xl text-zinc-600 mb-2"></i>
+                        <p class="text-xs font-semibold text-zinc-400">No notifications in this feed</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach(n => {
+                const item = document.createElement('div');
+                item.className = 'bg-[#1E1E24] border border-[#2A2A32] rounded-2xl p-3.5 space-y-1';
+                item.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <h4 class="text-xs font-extrabold text-white flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check text-brand-yellow text-[10px]"></i>
+                            ${n.title}
+                        </h4>
+                        <span class="text-[9px] text-zinc-500 font-medium">${n.time}</span>
+                    </div>
+                    <p class="text-xs text-zinc-300 leading-snug">${n.message}</p>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const msg = input.value.trim();
+            if (!msg) return;
+
+            const box = document.getElementById('chatMessages');
+
+            const uMsg = document.createElement('div');
+            uMsg.className = 'bg-brand-yellow text-black p-2.5 rounded-2xl rounded-tr-none max-w-[85%] ml-auto font-medium';
+            uMsg.innerText = msg;
+            box.appendChild(uMsg);
+
+            input.value = '';
+            box.scrollTop = box.scrollHeight;
+
+            setTimeout(() => {
+                const bMsg = document.createElement('div');
+                bMsg.className = 'bg-zinc-800/80 p-2.5 rounded-2xl rounded-tl-none max-w-[85%] text-zinc-200';
+                
+                if (msg.toLowerCase().includes('data') || msg.toLowerCase().includes('bundle')) {
+                    bMsg.innerText = "Data bundles on MTN, Telecel, and AT are dispatched automatically within 1 minute of transaction confirmation!";
+                } else if (msg.toLowerCase().includes('result') || msg.toLowerCase().includes('checker')) {
+                    bMsg.innerText = "WAEC BECE and WASSCE PINs are generated instantly on screen and saved under your History tab.";
+                } else {
+                    bMsg.innerText = "Thanks for reaching out! You can click 'Chat on WhatsApp' above to talk with a live human agent directly.";
+                }
+
+                box.appendChild(bMsg);
+                box.scrollTop = box.scrollHeight;
+            }, 600);
+        }
+
+        function rateWebsite(stars) {
+            const container = document.getElementById('starRatingContainer');
+            const starsList = container.querySelectorAll('i');
+            starsList.forEach((star, idx) => {
+                if (idx < stars) {
+                    star.className = 'fa-solid fa-star text-2xl text-brand-yellow cursor-pointer';
+                } else {
+                    star.className = 'fa-solid fa-star text-2xl text-zinc-600 cursor-pointer';
+                }
+            });
+
+            document.getElementById('ratingFeedback').innerText = `Thank you for giving PalomaDataHub GH a ${stars}-Star Rating! ⭐`;
+            showToast("Rating submitted successfully!");
+        }
+
+        function copyReferralLink() {
+            const link = "https://palomadatahub.com/ref?agent=kofi233";
+            const temp = document.createElement('textarea');
+            temp.value = link;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+            showToast("Referral Link copied to clipboard!");
+        }
+
+        function copyPinDetails() {
+            const serial = document.getElementById('resSerial').innerText;
+            const pin = document.getElementById('resPin').innerText;
+            const text = `PalomaDataHub Pin -\nSerial: ${serial}\nPIN: ${pin}`;
+            
+            const temp = document.createElement('textarea');
+            temp.value = text;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+            showToast("PIN & Serial copied to clipboard!");
+        }
+
+        function logoutSimulation() {
+            showToast("Switched user profile");
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMessage').innerText = msg;
+            toast.classList.remove('-translate-y-20', 'opacity-0', 'pointer-events-none');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('-translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 2800);
+        }
+
+        function logoutSimulation() {
+    const newName = prompt("Enter your Full Name:", "Customer Name");
+    if (!newName) return;
+
+    const newPhone = prompt("Enter your Phone Number (e.g. 0241234567):", "0240000000");
+    if (!newPhone) return;
+
+    const newBalInput = prompt("Enter your Starting Wallet Balance (GH₵):", "50.00");
+    const newBal = parseFloat(newBalInput) || 0.00;
+
+    // Update state
+    state.user.name = newName;
+    state.user.phone = newPhone;
+    state.user.balance = newBal;
+
+    // Refresh UI elements
+    document.getElementById('accountName').innerText = newName;
+    document.getElementById('accountPhone').innerText = newPhone;
+    document.getElementById('accountBalance').innerText = `GH₵ ${newBal.toFixed(2)}`;
+
+    alert(`Account updated successfully! Welcome, ${newName}.`);
+}
+    
+ function processPayment(serviceTitle, amount, recipientPhone, onSuccessCallback) {
+    // 1. Check if user has sufficient funds
+    if (state.user.balance < amount) {
+        alert(`Insufficient Balance!\n\nTransaction Cost: GH₵ ${amount.toFixed(2)}\nYour Balance: GH₵ ${state.user.balance.toFixed(2)}\n\nPlease add money to your wallet.`);
+        return;
+    }
+
+    // 2. Request Mobile Money PIN or Payment Confirmation
+    const pin = prompt(`CONFIRM PAYMENT\n\nService: ${serviceTitle}\nRecipient: ${recipientPhone}\nTotal Cost: GH₵ ${amount.toFixed(2)}\n\nEnter your 4-digit PIN to authorize payment:`, "****");
+
+    if (pin === null) {
+        return; // User cancelled
+    }
+
+    if (pin.length < 4) {
+        alert("Transaction Cancelled: Invalid 4-Digit Security PIN.");
+        return;
+    }
+
+    // 3. Deduct payment from wallet balance
+    state.user.balance -= amount;
+
+    // 4. Update balance on the UI screen
+    const accountBalEl = document.getElementById('accountBalance');
+    if (accountBalEl) {
+        accountBalEl.innerText = `GH₵ ${state.user.balance.toFixed(2)}`;
+    }
+
+    // 5. Trigger success callback
+    onSuccessCallback();
+}
+     </script>   
 </body>
 </html>
